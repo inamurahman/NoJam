@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:nojam/get_details.dart'; // Import GetDetailPage from get_details.dart
+import 'package:nojam/home.dart';
+import 'dart:io';
 
 void main() {
   runApp(MyApp());
@@ -9,63 +11,35 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: LocationTracker(),
-    );
-  }
-}
+      home: FutureBuilder<bool>(
+        future: checkDetailsFile(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            final bool detailsExist = snapshot.data ?? false;
 
-class LocationTracker extends StatefulWidget {
-  @override
-  _LocationTrackerState createState() => _LocationTrackerState();
-}
+            // Determine which page to navigate to based on file existence
+            final initialRoute = detailsExist ? '/home' : '/getDetail';
 
-class _LocationTrackerState extends State<LocationTracker> {
-  String _locationInfo = 'Location unavailable';
-  Position? _previousPosition;
-
-  @override
-  void initState() {
-    super.initState();
-    _startTrackingLocation();
-  }
-
-  void _startTrackingLocation() async {
-    try {
-      LocationPermission permission = await Geolocator.requestPermission();
-
-      if (permission == LocationPermission.denied) {
-        setState(() {
-          _locationInfo = 'Location permission denied';
-        });
-      } else if (permission == LocationPermission.deniedForever) {
-        setState(() {
-          _locationInfo = 'Location permission permanently denied';
-        });
-      } else {
-        Geolocator.getPositionStream().listen((Position updatedPosition) {
-          if (_previousPosition == null ||
-              Geolocator.distanceBetween(_previousPosition!.latitude, _previousPosition!.longitude, updatedPosition.latitude, updatedPosition.longitude) >= 10) {
-            setState(() {
-              _locationInfo = 'Latitude: ${updatedPosition.latitude}, Longitude: ${updatedPosition.longitude}';
-              _previousPosition = updatedPosition;
-            });
+            return MaterialApp(
+              initialRoute: initialRoute, // Set the initial route
+              routes: {
+                '/home': (context) => HomePage(),
+                '/getDetail': (context) => GetDetailPage(),
+              },
+              debugShowCheckedModeBanner: false,
+            );
+          } else {
+            // Handle loading state here if needed
+            return CircularProgressIndicator(); // Replace with appropriate widget
           }
-        });
-      }
-    } catch (e) {
-      // Handle the exception
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Location Tracker'),
-      ),
-      body: Center(
-        child: Text(_locationInfo),
+        },
       ),
     );
+  }
+
+  Future<bool> checkDetailsFile() async {
+    // Check if the your_detail.json file exists
+    final file = File('your_detail.json');
+    return await file.exists();
   }
 }
