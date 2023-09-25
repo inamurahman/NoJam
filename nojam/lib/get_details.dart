@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:nojam/home.dart';
+import 'package:nojam/my-globals.dart' as globals;
 
 /*
 void GetDetailPage() {
@@ -17,7 +18,7 @@ void GetDetailPage() {
 */
 
 class GetDetailPage extends StatelessWidget {
-  const GetDetailPage({super.key});
+  //const GetDetailPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +103,12 @@ class _CarbonFootprintCalculatorState extends State<CarbonFootprintCalculator> {
                   */
                   // Call the method to save data to JSON here
                   saveValuesToJsonFile();
+                  globals.mileage = double.tryParse(mileage);
+                  globals.fuelType = selectedFuelType;
+                  globals.loginUser();
+                  // Example: When the user logs in successfully, set loggedIn to true and save it.
+                  
+
                 });
 
                 // Redirect to HomePage
